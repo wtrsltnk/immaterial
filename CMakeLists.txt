@@ -2,16 +2,15 @@ cmake_minimum_required(VERSION 2.6)
 
 project(immaterial)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-   SET(ENABLE_CXX11 "-std=c++11")
+include(win-cpp-deps.cmake/win-cpp-deps.cmake)
 
-   EXECUTE_PROCESS(COMMAND "${CMAKE_CXX_COMPILER} -dumpversion" OUTPUT_VARIABLE GCC_VERSION)
-   if (GCC_VERSION VERSION_LESS 4.7)
-      SET(ENABLE_CXX11 "-std=c++0x")
-   endif()
+install_dep("https://bitbucket.org/wincppdeps/glfw.git")
+install_dep("https://bitbucket.org/wincppdeps/sdl2.git")
+install_dep("https://bitbucket.org/wincppdeps/glm.git")
+install_dep("https://bitbucket.org/wincppdeps/bullet.git")
+install_dep("https://bitbucket.org/wincppdeps/glextloader.git")
 
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
-endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 find_package(OpenGL REQUIRED)
 
@@ -25,11 +24,10 @@ include_directories(${CMAKE_SOURCE_DIR}/common)
 
 set(SRC_APP
     common/font.cpp
-    common/glextl.cpp
-    common/main_sdl.cpp
-    common/settings.cpp
-    common/log.cpp
+    common/shader.cpp
+    input.cpp
     program.cpp
+    sdl2-setup.cpp
     )
 
 add_executable(immaterial ${SRC_APP})

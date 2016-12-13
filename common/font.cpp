@@ -10,6 +10,8 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
+#include "shader.h"
+
 typedef struct sVertex
 {
     float position[3];
@@ -234,15 +236,11 @@ const std::string fragmentShader(
         "}"
     );
 
-// TODO : The implementation can be found in hl1shader.cpp
-GLuint LoadShaderProgram(const std::string& vertShaderStr, const std::string& fragShaderStr, const std::map<GLuint, std::string>& attrLoc);
-
 void FontShader::LoadShader()
 {
     if (FontShader::_program == 0)
     {
-        std::map<GLuint, std::string> attrLoc;
-        FontShader::_program = LoadShaderProgram(vertexShader, fragmentShader, attrLoc);
+        FontShader::_program = LoadShaderProgram(vertexShader, fragmentShader);
 
         glUseProgram(FontShader::_program);
 
