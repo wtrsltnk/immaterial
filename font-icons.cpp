@@ -1,4 +1,4 @@
-#include "font.h"
+#include "font-icons.h"
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -6,9 +6,6 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
 
 #include "shader.h"
 
@@ -19,33 +16,33 @@ typedef struct sVertex
 
 } tVertex;
 
-Font::Font()
+FontIcons::FontIcons()
     : _fontSize(12.0f), _iconOffset(0), _textureId(0), _vertexArrayObject(0), _vertexBufferObject(0)
 { }
 
-Font::~Font()
+FontIcons::~FontIcons()
 { }
 
-void Font::GetBakedQuad(int pw, int ph, int char_index, float *xpos, float *ypos, stbtt_aligned_quad *q)
+void FontIcons::GetBakedQuad(int pw, int ph, int char_index, float *xpos, float *ypos, stbtt_aligned_quad *q)
 {
     stbtt_bakedchar *b = this->_charData + char_index;
     int round_x = STBTT_ifloor(*xpos + b->xoff);
     int round_y = STBTT_ifloor(*ypos - b->yoff);
 
-    q->x0 = (float)round_x;
-    q->y0 = (float)round_y;
-    q->x1 = (float)round_x + b->x1 - b->x0;
-    q->y1 = (float)round_y - b->y1 + b->y0;
+    q->x0 = float(round_x);
+    q->y0 = float(round_y);
+    q->x1 = float(round_x + b->x1 - b->x0);
+    q->y1 = float(round_y - b->y1 + b->y0);
 
-    q->s0 = b->x0 / (float)pw;
-    q->t0 = b->y0 / (float)pw;
-    q->s1 = b->x1 / (float)ph;
-    q->t1 = b->y1 / (float)ph;
+    q->s0 = b->x0 / float(pw);
+    q->t0 = b->y0 / float(pw);
+    q->s1 = b->x1 / float(ph);
+    q->t1 = b->y1 / float(ph);
 
     *xpos += b->xadvance;
 }
 
-bool Font::InitializeFont(const char* fontpath, float fontSize, int iconOffset)
+bool FontIcons::init(const char* fontpath, float fontSize, int iconOffset)
 {
     FontShader::LoadShader();
 
@@ -59,10 +56,10 @@ bool Font::InitializeFont(const char* fontpath, float fontSize, int iconOffset)
         return false;
 
     fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
+    size_t size = size_t(ftell(fp));
     fseek(fp, 0, SEEK_SET);
 
-    unsigned char* ttfBuffer = (unsigned char*)malloc(size);
+    unsigned char* ttfBuffer = reinterpret_cast<unsigned char*>(malloc(size));
     if (!ttfBuffer)
     {
         fclose(fp);
@@ -73,7 +70,7 @@ bool Font::InitializeFont(const char* fontpath, float fontSize, int iconOffset)
     fclose(fp);
     fp = 0;
 
-    unsigned char* bmap = (unsigned char*)malloc(BMAP_SIZE*BMAP_SIZE);
+    unsigned char* bmap = reinterpret_cast<unsigned char*>(malloc(BMAP_SIZE*BMAP_SIZE));
     if (!bmap)
     {
         free(ttfBuffer);
@@ -164,11 +161,11 @@ bool Font::InitializeFont(const char* fontpath, float fontSize, int iconOffset)
     glBindBuffer(GL_ARRAY_BUFFER, this->_vertexBufferObject);
     glBufferData(GL_ARRAY_BUFFER, i * sizeof(tVertex), (const GLvoid *)vertices, GL_STATIC_DRAW);
 
-    GLint vertexAttrib = glGetAttribLocation(FontShader::_program, "vertex");
+    GLuint vertexAttrib = glGetAttribLocation(FontShader::_program, "vertex");
     glVertexAttribPointer(vertexAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(tVertex), 0);
     glEnableVertexAttribArray(vertexAttrib);
 
-    GLint texcoordAttrib = glGetAttribLocation(FontShader::_program, "texcoords");
+    GLuint texcoordAttrib = glGetAttribLocation(FontShader::_program, "texcoords");
     glVertexAttribPointer(texcoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(tVertex), (const GLvoid *)(sizeof(GLfloat)*3));
     glEnableVertexAttribArray(texcoordAttrib);
 
@@ -179,7 +176,7 @@ bool Font::InitializeFont(const char* fontpath, float fontSize, int iconOffset)
     return true;
 }
 
-void Font::DrawIcon(const glm::mat4& proj, const glm::mat4& view, float x, float y, int icon, const glm::vec4& global_color)
+void FontIcons::DrawIcon(const glm::mat4& proj, const glm::mat4& view, float x, float y, int icon, const glm::vec4& global_color)
 {
     glm::mat4 local = glm::mat4(1.0f);
     if (this->_textureId == 0) return;

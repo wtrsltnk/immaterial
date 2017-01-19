@@ -30,7 +30,7 @@ int SDLProgram::Run(int argc, char* argv[])
     }
 
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    this->_window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+    this->_window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (this->_window == 0)
     {
         std::cout << "Unable to create Window" << std::endl;
@@ -44,7 +44,7 @@ int SDLProgram::Run(int argc, char* argv[])
         return -1;
     }
 
-    glExtLoadAll((PFNGLGETPROC*)SDL_GL_GetProcAddress);
+    glExtLoadAll(reinterpret_cast<PFNGLGETPROC*>(SDL_GL_GetProcAddress));
 
     if (this->SetUp())
     {
@@ -59,7 +59,11 @@ int SDLProgram::Run(int argc, char* argv[])
                 if (event.type == SDL_WINDOWEVENT)
                 {
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+                    {
                         this->OnResize(event.window.data1, event.window.data2);
+                        this->width = event.window.data1;
+                        this->height = event.window.data2;
+                    }
                     else if (event.window.event == SDL_WINDOWEVENT_CLOSE)
                         this->keepRunning = false;
                 }

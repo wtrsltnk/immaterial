@@ -23,11 +23,16 @@ include_directories(${GLM_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/common)
 
 set(SRC_APP
-    common/font.cpp
-    common/shader.cpp
+    font.cpp
+    font-icons.cpp
+    shader.cpp
+    glextl.cpp
     input.cpp
     program.cpp
     sdl2-setup.cpp
+    geometry.cpp
+    texture.cpp
+    ui.cpp
     )
 
 add_executable(immaterial ${SRC_APP})
